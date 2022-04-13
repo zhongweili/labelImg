@@ -8,6 +8,7 @@ import shutil
 import sys
 import webbrowser as wb
 from functools import partial
+from shutil import copyfile
 
 try:
     from PyQt5.QtGui import *
@@ -89,6 +90,7 @@ class MainWindow(QMainWindow, WindowMixin):
 
         # Save as Pascal voc xml
         self.default_save_dir = default_save_dir
+        self.default_verify_dir = ""
         self.label_file_format = settings.get(SETTING_LABEL_FILE_FORMAT, LabelFileFormat.PASCAL_VOC)
 
         # For loading all image under a directory
@@ -223,6 +225,9 @@ class MainWindow(QMainWindow, WindowMixin):
         change_save_dir = action(get_str('changeSaveDir'), self.change_save_dir_dialog,
                                  'Ctrl+r', 'open', get_str('changeSavedAnnotationDir'))
 
+        change_verify_dir = action(get_str('changeVerifyDir'), self.change_verify_dir_dialog,
+                                 'Ctrl+r', 'open', get_str('changeVerifiedAnnotationDir'))
+
         open_annotation = action(get_str('openAnnotation'), self.open_annotation_dialog,
                                  'Ctrl+Shift+O', 'open', get_str('openAnnotationDetail'))
         copy_prev_bounding = action(get_str('copyPrevBounding'), self.copy_previous_bounding_boxes, 'Ctrl+v', 'copy', get_str('copyPrevBounding'))
@@ -234,7 +239,7 @@ class MainWindow(QMainWindow, WindowMixin):
                                  'a', 'prev', get_str('prevImgDetail'))
 
         verify = action(get_str('verifyImg'), self.verify_image,
-                        'space', 'verify', get_str('verifyImgDetail'))
+                        'e', 'verify', get_str('verifyImgDetail'))
 
         save = action(get_str('save'), self.save_file,
                       'Ctrl+S', 'save', get_str('saveDetail'), enabled=False)
@@ -402,7 +407,7 @@ class MainWindow(QMainWindow, WindowMixin):
         self.display_label_option.triggered.connect(self.toggle_paint_labels_option)
 
         add_actions(self.menus.file,
-                    (open, open_dir, change_save_dir, open_annotation, copy_prev_bounding, self.menus.recentFiles, save, save_format, save_as, close, reset_all, delete_image, quit))
+                    (open, open_dir, change_save_dir, change_verify_dir, open_annotation, copy_prev_bounding, self.menus.recentFiles, save, save_format, save_as, close, reset_all, delete_image, quit))
         add_actions(self.menus.help, (help_default, show_info, show_shortcut))
         add_actions(self.menus.view, (
             self.auto_saving,
@@ -423,11 +428,11 @@ class MainWindow(QMainWindow, WindowMixin):
 
         self.tools = self.toolbar('Tools')
         self.actions.beginner = (
-            open, open_dir, change_save_dir, open_next_image, open_prev_image, verify, save, save_format, None, create, copy, delete, None,
+            open, open_dir, change_save_dir, change_verify_dir, open_next_image, open_prev_image, verify, save, save_format, None, create, copy, delete, None,
             zoom_in, zoom, zoom_out, fit_window, fit_width)
 
         self.actions.advanced = (
-            open, open_dir, change_save_dir, open_next_image, open_prev_image, save, save_format, None,
+            open, open_dir, change_save_dir, change_verify_dir, open_next_image, open_prev_image, save, save_format, None,
             create_mode, edit_mode, None,
             hide_all, show_all)
 
@@ -1262,6 +1267,23 @@ class MainWindow(QMainWindow, WindowMixin):
                                      ('Change saved folder', self.default_save_dir))
         self.statusBar().show()
 
+    def change_verify_dir_dialog(self, _value=False):
+        if self.default_verify_dir is not None:
+            path = ustr(self.default_verify_dir)
+        else:
+            path = '.'
+
+        dir_path = ustr(QFileDialog.getExistingDirectory(self,
+                                                         '%s - Save verify annotations to the directory' % __appname__, path,  QFileDialog.ShowDirsOnly
+                                                         | QFileDialog.DontResolveSymlinks))
+
+        if dir_path is not None and len(dir_path) > 1:
+            self.default_verify_dir = dir_path
+
+        self.statusBar().showMessage('%s . Verified annotation will be saved to %s' %
+                                     ('Change saved folder', self.default_verify_dir))
+        self.statusBar().show()
+
     def open_annotation_dialog(self, _value=False):
         if self.file_path is None:
             self.statusBar().showMessage('Please select image first')
@@ -1400,6 +1422,20 @@ class MainWindow(QMainWindow, WindowMixin):
             self.load_file(filename)
 
     def save_file(self, _value=False):
+        if self.default_verify_dir is not None and len(ustr(self.default_verify_dir)):
+            image_file_name = os.path.basename(self.file_path)
+            saved_file_name = os.path.splitext(image_file_name)[0]
+            saved_path = os.path.join(ustr(self.default_save_dir), saved_file_name)
+            ## for Yolo format only
+            if os.path.isfile(saved_path + '.txt'):
+                copyfile(
+                    os.path.join(saved_path + '.txt'), 
+                    os.path.join(self.default_verify_dir + '/' + saved_file_name + '.txt')
+                )
+                self.canvas.verified = True
+                self.paint_canvas()
+                return
+
         if self.default_save_dir is not None and len(ustr(self.default_save_dir)):
             if self.file_path:
                 image_file_name = os.path.basename(self.file_path)
@@ -1413,6 +1449,7 @@ class MainWindow(QMainWindow, WindowMixin):
             saved_path = os.path.join(image_file_dir, saved_file_name)
             self._save_file(saved_path if self.label_file
                             else self.save_file_dialog(remove_ext=False))
+
 
     def save_file_as(self, _value=False):
         assert not self.image.isNull(), "cannot save empty image"

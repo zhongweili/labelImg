@@ -11,6 +11,8 @@ labelImg.egg-info*
 build/
 dist/
 
+dataset/
+
 tags
 cscope*
 .ycm_extra_conf.py

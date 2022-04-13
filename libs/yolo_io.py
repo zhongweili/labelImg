@@ -134,6 +134,7 @@ class YoloReader:
         return label, x_min, y_min, x_max, y_max
 
     def parse_yolo_format(self):
+      #  print('file_path', self.file_path)
         bnd_box_file = open(self.file_path, 'r')
         for bndBox in bnd_box_file:
             class_index, x_center, y_center, w, h = bndBox.strip().split(' ')
