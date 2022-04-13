@@ -263,6 +263,13 @@ This is used when creating a dataset automatically, the user can then through al
 The difficult field is set to 1 indicates that the object has been annotated as "difficult", for example, an object which is clearly visible but difficult to recognize without substantial use of context.
 According to your deep neural network implementation, you can include or exclude difficult objects during training.
 
+**Verify and Modify(for our scenario)**
+1. Click 'Open Dir' menu and choose the original images directory.
+2. Click 'Change Save Dir' menu and choose the annotations directory. Annotations will be loaded as bounding boxes in the images.
+3. Click 'Change Verify Dir' menu and choose a new directory storing label results.
+4. Start labeling! (It would be much quicker with shortcuts)
+
+
 How to reset the settings
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
