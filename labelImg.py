@@ -239,7 +239,7 @@ class MainWindow(QMainWindow, WindowMixin):
                                  'a', 'prev', get_str('prevImgDetail'))
 
         verify = action(get_str('verifyImg'), self.verify_image,
-                        'e', 'verify', get_str('verifyImgDetail'))
+                        'Space', 'verify', get_str('verifyImgDetail'))
 
         save = action(get_str('save'), self.save_file,
                       'Ctrl+S', 'save', get_str('saveDetail'), enabled=False)
@@ -1423,20 +1423,13 @@ class MainWindow(QMainWindow, WindowMixin):
 
     def save_file(self, _value=False):
         if self.default_verify_dir is not None and len(ustr(self.default_verify_dir)):
-            image_file_name = os.path.basename(self.file_path)
-            saved_file_name = os.path.splitext(image_file_name)[0]
-            saved_path = os.path.join(ustr(self.default_save_dir), saved_file_name)
-            ## for Yolo format only
-            if os.path.isfile(saved_path + '.txt'):
-                copyfile(
-                    os.path.join(saved_path + '.txt'), 
-                    os.path.join(self.default_verify_dir + '/' + saved_file_name + '.txt')
-                )
-                self.canvas.verified = True
-                self.paint_canvas()
-                return
+            if self.file_path:
+                image_file_name = os.path.basename(self.file_path)
+                saved_file_name = os.path.splitext(image_file_name)[0]
+                saved_path = os.path.join(ustr(self.default_verify_dir), saved_file_name)
+                self._save_file(saved_path)
 
-        if self.default_save_dir is not None and len(ustr(self.default_save_dir)):
+        elif self.default_save_dir is not None and len(ustr(self.default_save_dir)):
             if self.file_path:
                 image_file_name = os.path.basename(self.file_path)
                 saved_file_name = os.path.splitext(image_file_name)[0]
