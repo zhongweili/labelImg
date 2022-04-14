@@ -263,11 +263,39 @@ This is used when creating a dataset automatically, the user can then through al
 The difficult field is set to 1 indicates that the object has been annotated as "difficult", for example, an object which is clearly visible but difficult to recognize without substantial use of context.
 According to your deep neural network implementation, you can include or exclude difficult objects during training.
 
-**Verify and Modify(for our scenario)**
-1. Click 'Open Dir' menu and choose the original images directory.
-2. Click 'Change Save Dir' menu and choose the annotations directory. Annotations will be loaded as bounding boxes in the images.
-3. Click 'Change Verify Dir' menu and choose a new directory storing label results.
-4. Start labeling! (It would be much quicker with shortcuts)
+
+For Our Scenario
+~~~~~~~~~~~~~~~~~~~~~~~~~
+##Verify and Modify**
+1. Prepare the dataset files. 
+    * Download original images from s3://
+    * Download annotation json file from
+    * Extract prelabeled annotaion of each image from the JSON file.
+    ```
+    import os
+    import json
+
+    origin_images_dir = ''
+    pre_annotation_dir = ''
+    json_path = './annotation_data_0412.json'
+    with open(json_path, 'r') as f:
+        dic = json.load(f)
+        for key, value in dic.items():
+            if os.path.isfile(origin_images_dir + key + '.jpg'):
+                label_f = open(pre_annotation_dir + key + '.txt', 'a')
+                for v in value:
+                    label_f.write(v + '\n')
+                label_f.close()
+
+    ```
+
+2. Click 'Open Dir' menu and choose the original images directory.
+
+3. Click 'Change Save Dir' menu and choose the annotations directory. Annotations will be loaded as bounding boxes in the images.
+
+4. Click 'Change Verify Dir' menu and choose a new directory storing label results.
+
+5. Start labeling! (It would be much quicker with shortcuts)
 
 
 How to reset the settings
