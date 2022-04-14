@@ -266,30 +266,17 @@ According to your deep neural network implementation, you can include or exclude
 
 For Our Scenario
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-##Verify and Modify**
+
 1. Prepare the dataset files. 
-    * Download original images from s3://
-    * Download annotation json file from
-    * Extract prelabeled annotaion of each image from the JSON file.
-    ```
-    import os
-    import json
 
-    origin_images_dir = ''
-    pre_annotation_dir = ''
-    json_path = './annotation_data_0412.json'
-    with open(json_path, 'r') as f:
-        dic = json.load(f)
-        for key, value in dic.items():
-            if os.path.isfile(origin_images_dir + key + '.jpg'):
-                label_f = open(pre_annotation_dir + key + '.txt', 'a')
-                for v in value:
-                    label_f.write(v + '\n')
-                label_f.close()
+* Download original images from s3
 
-    ```
+* Download annotation JSON file from s3
 
-2. Click 'Open Dir' menu and choose the original images directory.
+* Extract the prelabeled annotations of each image from the JSON file.
+
+
+2. Click 'Open Dir' menu and choose the directory of the original images.
 
 3. Click 'Change Save Dir' menu and choose the annotations directory. Annotations will be loaded as bounding boxes in the images.
 
